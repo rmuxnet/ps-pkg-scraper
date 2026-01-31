@@ -1,4 +1,4 @@
-cloudscraper
+curl-cffi
 beautifulsoup4
 rich
 questionary
