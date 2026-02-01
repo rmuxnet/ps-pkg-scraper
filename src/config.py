@@ -1,7 +1,6 @@
 import json
 import os
 
-# Default fallback values in case settings.json is missing or corrupt
 DEFAULTS = {
     "scraper": {
         "base_url": "https://www.superpsx.com/",
@@ -19,16 +18,19 @@ class Config:
         self.settings = self._load_settings(config_path)
 
     def _load_settings(self, path):
-        if not os.path.exists(path):
-            print(f"[WARNING] {path} not found. Using defaults.")
-            return DEFAULTS
-        
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except (json.JSONDecodeError, OSError) as e:
-            print(f"[ERROR] Could not load {path}: {e}. Using defaults.")
-            return DEFAULTS
+        final_settings = DEFAULTS.copy()
+        if os.path.exists(path):
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    file_settings = json.load(f)
+                    final_settings["scraper"].update(file_settings.get("scraper", {}))
+                    final_settings["database"].update(file_settings.get("database", {}))
+            except Exception as e:
+                print(f"[ERROR] Could not load {path}: {e}")
+        env_base_url = os.getenv("SCRAPER_BASE_URL")
+        if env_base_url:
+            final_settings["scraper"]["base_url"] = env_base_url
+        return final_settings
 
     @property
     def scraper(self):
@@ -38,5 +40,4 @@ class Config:
     def database(self):
         return self.settings.get("database", DEFAULTS["database"])
 
-# Create a singleton instance to be imported elsewhere
 cfg = Config()

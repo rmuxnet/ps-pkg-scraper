@@ -1,8 +1,7 @@
 import re
 import urllib.parse
-import cloudscraper
+from curl_cffi import requests # Changed from cloudscraper
 from bs4 import BeautifulSoup
-
 
 try:
     from src.config import cfg
@@ -15,17 +14,13 @@ DEFAULT_IGNORE_DOMAINS = [
     "instagram", "pinterest", "youtube", "telegram",
     "wp.com", "google.com"
 ]
-DEFAULT_TIMEOUT = 15
+DEFAULT_TIMEOUT = 30 # Increased timeout for cloud stability
 
 class PSScraper:
     def __init__(self):
-        self.scraper = cloudscraper.create_scraper(
-            browser={
-                "browser": "chrome",
-                "platform": "windows",
-                "mobile": False
-            }
-        )
+        # We now use a curl_cffi Session instead of cloudscraper
+        self.scraper = requests.Session()
+        
         scraper_cfg = getattr(cfg, "scraper", {}) if cfg else {}
         self.base_url = scraper_cfg.get("base_url", DEFAULT_BASE_URL)
         self.ignore_domains = scraper_cfg.get("ignore_domains", DEFAULT_IGNORE_DOMAINS)
@@ -36,7 +31,8 @@ class PSScraper:
         url = f"{self.base_url}?{urllib.parse.urlencode(params)}"
 
         try:
-            response = self.scraper.get(url, timeout=self.timeout)
+            # impersonate="chrome" is the magic key to bypass Cloudflare
+            response = self.scraper.get(url, timeout=self.timeout, impersonate="chrome")
             response.raise_for_status()
             soup = BeautifulSoup(response.content, "html.parser")
             
@@ -59,7 +55,9 @@ class PSScraper:
                 })
 
             return results
-        except Exception:
+        except Exception as e:
+            # Print the error so you can see it in Render logs if it fails again
+            print(f"[ERROR] Search failed: {e}")
             return []
 
     def _extract_links(self, soup):
@@ -205,7 +203,8 @@ class PSScraper:
         }
 
         try:
-            resp = self.scraper.get(game_url, timeout=self.timeout)
+            # Added impersonate="chrome" here as well
+            resp = self.scraper.get(game_url, timeout=self.timeout, impersonate="chrome")
             soup = BeautifulSoup(resp.content, "html.parser")
             
             self._parse_metadata(soup, metadata)
@@ -216,7 +215,8 @@ class PSScraper:
             if dl_node:
                 try:
                     dl_url = dl_node["href"]
-                    dl_resp = self.scraper.get(dl_url, timeout=self.timeout)
+                    # Added impersonate="chrome" here as well
+                    dl_resp = self.scraper.get(dl_url, timeout=self.timeout, impersonate="chrome")
                     dl_soup = BeautifulSoup(dl_resp.content, "html.parser")
                     
                     self._parse_metadata(dl_soup, metadata)
@@ -224,10 +224,12 @@ class PSScraper:
                     
                     if final_links:
                         return final_links, metadata
-                except Exception:
+                except Exception as e:
+                    print(f"[WARNING] DL Page extract failed: {e}")
                     pass
 
             final_links = self._extract_grouped_links(soup)
             return final_links, metadata
-        except Exception:
+        except Exception as e:
+            print(f"[ERROR] Game link extract failed: {e}")
             return [], metadata

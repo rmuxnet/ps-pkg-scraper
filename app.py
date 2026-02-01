@@ -44,7 +44,11 @@ class PKGScraperCLI:
         cached_data = self.db.get(game["url"])
 
         if cached_data:
-            console.print(" [bold green]✓[/bold green] [italic]Loaded from local cache[/italic]")
+            if getattr(self.db, "redis_client", None):
+                console.print(" [bold green]✓[/bold green] [italic]Loaded from Redis Cloud[/italic]")
+            else:
+                console.print(" [bold green]✓[/bold green] [italic]Loaded from local cache[/italic]")
+            
             links = cached_data["links"]
             metadata = cached_data.get("metadata", {"size": cached_data.get("size", "N/A")})
         else:

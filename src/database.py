@@ -1,6 +1,7 @@
 import json
 import os
 import time
+import redis
 
 try:
     from src.config import cfg  # type: ignore
@@ -24,18 +25,41 @@ else:
 class GameCache:
     def __init__(self):
         self._cache = {}
+        self.redis_client = None
+
+        self.redis_url = os.getenv("REDIS_URL")
+
+        if self.redis_url:
+            try:
+                self.redis_client = redis.from_url(self.redis_url, decode_responses=True)
+                print("[INFO] Connected to Redis Cloud Database")
+            except Exception as e:
+                print(f"[ERROR] Could not connect to Redis: {e}")
+                self.redis_client = None
 
     def load(self):
-        if os.path.exists(CACHE_FILE):
-            try:
-                with open(CACHE_FILE, "r", encoding="utf-8") as f:
-                    self._cache = json.load(f)
-            except (OSError, json.JSONDecodeError):
+            if os.path.exists(CACHE_FILE):
+                try:
+                    with open(CACHE_FILE, "r", encoding="utf-8") as f:
+                        self._cache = json.load(f)
+                except (OSError, json.JSONDecodeError):
+                    self._cache = {}
+            else:
                 self._cache = {}
-        else:
-            self._cache = {}
 
     def get(self, url):
+        if self.redis_client:
+            try:
+                data_str = self.redis_client.get(url)
+                if not data_str:
+                    return None
+                data = json.loads(data_str)
+                if "metadata" not in data or not data.get("links"):
+                    return None
+                return data
+            except Exception:
+                return None
+
         data = self._cache.get(url)
         if not data:
             return None
@@ -43,10 +67,6 @@ class GameCache:
         if "metadata" not in data:
             return None
 
-        meta = data["metadata"]
-        if meta.get("version", "N/A") == "N/A" and meta.get("cusa", "N/A") == "N/A":
-            return None
-            
         if not data.get("links"):
             return None
 
@@ -57,7 +77,7 @@ class GameCache:
         return data
 
     def save(self, game_data, links, metadata):
-        self._cache[game_data["url"]] = {
+        cache_entry = {
             "url": game_data["url"],
             "title": game_data["title"],
             "size": metadata.get("size", "N/A"),
@@ -67,6 +87,18 @@ class GameCache:
             "timestamp": time.time(),
         }
 
+        if self.redis_client:
+            try:
+                self.redis_client.setex(
+                    game_data["url"],
+                    CACHE_TTL,
+                    json.dumps(cache_entry)
+                )
+            except Exception as e:
+                print(f"[ERROR] Failed to save to Redis: {e}")
+            return
+
+        self._cache[game_data["url"]] = cache_entry
         try:
             with open(CACHE_FILE, "w", encoding="utf-8") as f:
                 json.dump(self._cache, f, indent=4)
