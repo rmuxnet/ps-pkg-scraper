@@ -99,7 +99,11 @@ class GameCache:
 
         self._cache[game_data["url"]] = cache_entry
         try:
+            dirpath = os.path.dirname(CACHE_FILE)
+            if dirpath:
+                os.makedirs(dirpath, exist_ok=True)
+
             with open(CACHE_FILE, "w", encoding="utf-8") as f:
                 json.dump(self._cache, f, indent=4)
-        except OSError:
-            pass
+        except OSError as e:
+            print(f"[ERROR] Failed to save cache: {e}")

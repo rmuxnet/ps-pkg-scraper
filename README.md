@@ -25,7 +25,7 @@ python app.py -s "Game Name"
 Workflow:
 - Search for a game.
 - Select a result to view metadata and download links.
-- Results may be cached locally or in Redis.
+- Results may be cached locally (JSON) or in Redis (if REDIS_URL set).
 
 ## HTTP API
 
@@ -74,3 +74,12 @@ Ensure env vars (e.g., REDIS_URL) are configured in your deployment environment.
 
 - Use responsibly and respect site terms of service.
 - The scraper uses simple HTML parsing; site changes may require updates.
+
+TODO:
+- Add proxy health checks and a background validator (periodically test/mark bad proxies).
+- Expose proxy status/metrics via API (e.g., /proxy/health).
+- Add more robust health checks (API readiness, Redis connectivity, cache integrity).
+- Add metrics (request counts, cache hits/misses, proxy failures) and basic monitoring endpoints.
+
+Contributing
+- PRs welcome. Please include tests for new behavior and update README/TODO as features evolve.

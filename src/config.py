@@ -6,16 +6,16 @@ DEFAULTS = {
         "base_url": "https://www.superpsx.com/",
         "timeout": 15,
         "ignore_domains": [],
-        "proxy_file": "proxy.txt"
+        "proxy_file": "config/proxy.txt"
     },
     "database": {
-        "cache_file": "games_cache.json",
+        "cache_file": "data/games_cache.json",
         "cache_ttl": 31536000
     }
 }
 
 class Config:
-    def __init__(self, config_path="settings.json"):
+    def __init__(self, config_path="config/settings.json"):
         self.settings = self._load_settings(config_path)
 
     def _load_settings(self, path):
@@ -24,10 +24,13 @@ class Config:
             try:
                 with open(path, "r", encoding="utf-8") as f:
                     file_settings = json.load(f)
-                    final_settings["scraper"].update(file_settings.get("scraper", {}))
-                    final_settings["database"].update(file_settings.get("database", {}))
+                    if "scraper" in file_settings:
+                        final_settings["scraper"].update(file_settings["scraper"])
+                    if "database" in file_settings:
+                        final_settings["database"].update(file_settings["database"])
             except Exception as e:
                 print(f"[ERROR] Could not load {path}: {e}")
+        
         env_base_url = os.getenv("SCRAPER_BASE_URL")
         if env_base_url:
             final_settings["scraper"]["base_url"] = env_base_url

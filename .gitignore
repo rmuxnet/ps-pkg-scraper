@@ -1,3 +1,4 @@
 /src/__pycache__
-games_cache.json
-proxy.txt
+data/games_cache.json
+config/proxy.txt
+*.pyc
