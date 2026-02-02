@@ -5,7 +5,8 @@ DEFAULTS = {
     "scraper": {
         "base_url": "https://www.superpsx.com/",
         "timeout": 15,
-        "ignore_domains": []
+        "ignore_domains": [],
+        "proxy_file": "proxy.txt"
     },
     "database": {
         "cache_file": "games_cache.json",

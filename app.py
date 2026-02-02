@@ -134,7 +134,7 @@ class PKGScraperCLI:
         console.print("\n" + "[dim]━[/dim]" * 50 + "\n")
 
     def run(self):
-        title_text = Text("PS PKG Scraper Pro", style="bold white")
+        title_text = Text("PS PKG Scraper v1.2", style="bold white")
         subtitle = Text("Interactive Search & Scrape Tool", style="dim")
         
         console.print(Panel.fit(

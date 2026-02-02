@@ -2,10 +2,6 @@ curl-cffi
 beautifulsoup4
 rich
 questionary
-black
-pylint
-mypy
-isort
 fastapi
 uvicorn
 slowapi

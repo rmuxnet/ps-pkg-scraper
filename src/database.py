@@ -4,7 +4,7 @@ import time
 import redis
 
 try:
-    from src.config import cfg  # type: ignore
+    from src.config import cfg
 except Exception:
     cfg = None
 
@@ -26,7 +26,6 @@ class GameCache:
     def __init__(self):
         self._cache = {}
         self.redis_client = None
-
         self.redis_url = os.getenv("REDIS_URL")
 
         if self.redis_url:
@@ -38,14 +37,14 @@ class GameCache:
                 self.redis_client = None
 
     def load(self):
-            if os.path.exists(CACHE_FILE):
-                try:
-                    with open(CACHE_FILE, "r", encoding="utf-8") as f:
-                        self._cache = json.load(f)
-                except (OSError, json.JSONDecodeError):
-                    self._cache = {}
-            else:
+        if os.path.exists(CACHE_FILE):
+            try:
+                with open(CACHE_FILE, "r", encoding="utf-8") as f:
+                    self._cache = json.load(f)
+            except (OSError, json.JSONDecodeError):
                 self._cache = {}
+        else:
+            self._cache = {}
 
     def get(self, url):
         if self.redis_client:
