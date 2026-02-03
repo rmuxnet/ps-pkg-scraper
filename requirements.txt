@@ -16,9 +16,11 @@ fastapi==0.128.0
 h11==0.16.0
 idna==3.11
 isort==7.0.0
+Jinja2==3.1.6
 librt==0.7.8
 limits==5.6.0
 markdown-it-py==4.0.0
+MarkupSafe==3.0.3
 mccabe==0.7.0
 mdurl==0.1.2
 mypy==1.19.1
