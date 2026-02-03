@@ -12,7 +12,8 @@
             "youtube",
             "telegram",
             "wp.com",
-            "google.com"
+            "google.com",
+            "github.com/rmuxnet" // remove this line if you dont want to check for updates
         ]
     },
     "database": {
