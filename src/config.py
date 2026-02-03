@@ -1,7 +1,9 @@
 import json
 import os
+import copy
 
 DEFAULTS = {
+    "webui": False,
     "scraper": {
         "base_url": "https://www.superpsx.com/",
         "timeout": 15,
@@ -19,7 +21,7 @@ class Config:
         self.settings = self._load_settings(config_path)
 
     def _load_settings(self, path):
-        final_settings = DEFAULTS.copy()
+        final_settings = copy.deepcopy(DEFAULTS)
         if os.path.exists(path):
             try:
                 with open(path, "r", encoding="utf-8") as f:
@@ -28,6 +30,8 @@ class Config:
                         final_settings["scraper"].update(file_settings["scraper"])
                     if "database" in file_settings:
                         final_settings["database"].update(file_settings["database"])
+                    if "webui" in file_settings:
+                        final_settings["webui"] = bool(file_settings["webui"])
             except Exception as e:
                 print(f"[ERROR] Could not load {path}: {e}")
         
@@ -43,5 +47,9 @@ class Config:
     @property
     def database(self):
         return self.settings.get("database", DEFAULTS["database"])
+
+    @property
+    def webui(self):
+        return bool(self.settings.get("webui", DEFAULTS["webui"]))
 
 cfg = Config()

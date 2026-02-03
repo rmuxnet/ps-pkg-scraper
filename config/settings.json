@@ -1,23 +1,24 @@
 {
-    "scraper": {
-        "base_url": "https://www.superpsx.com/",
-        "timeout": 15,
-        "ignore_domains": [
-            "superpsx",
-            "facebook",
-            "twitter",
-            "discord",
-            "instagram",
-            "pinterest",
-            "youtube",
-            "telegram",
-            "wp.com",
-            "google.com",
-            "github.com/rmuxnet" // remove this line if you dont want to check for updates
-        ]
-    },
-    "database": {
-        "cache_file": "games_cache.json",
-        "cache_ttl": 31536000
-    }
+  "webui": true,
+  "scraper": {
+    "base_url": "https://www.superpsx.com/",
+    "timeout": 15,
+    "ignore_domains": [
+      "superpsx",
+      "facebook",
+      "twitter",
+      "discord",
+      "instagram",
+      "pinterest",
+      "youtube",
+      "telegram",
+      "wp.com",
+      "google.com",
+      "github.com/rmuxnet"
+    ]
+  },
+  "database": {
+    "cache_file": "games_cache.json",
+    "cache_ttl": 31536000
+  }
 }

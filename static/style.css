@@ -1,0 +1,27 @@
+html, body { 
+    background-color: #000000 !important; 
+}
+
+::selection { 
+    background: #ffffff; 
+    color: #000000; 
+}
+
+::-webkit-scrollbar { 
+    width: 6px; 
+}
+::-webkit-scrollbar-track { 
+    background: #000000; 
+}
+::-webkit-scrollbar-thumb { 
+    background: #333; 
+}
+
+.animate-blink { 
+    animation: blink 1s step-end infinite; 
+}
+
+@keyframes blink { 
+    0%, 100% { opacity: 1; } 
+    50% { opacity: 0; } 
+}

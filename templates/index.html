@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-black">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PS PKG Scraper // WebUI</title>
+    
+    <link rel="stylesheet" href="/static/style.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        black: '#000000', 
+                        offblack: '#0a0a0a',
+                        terminal: '#cccccc',
+                        dim: '#666666',
+                        border: '#171717',
+                        accent: '#ffffff', 
+                    },
+                    fontFamily: {
+                        mono: ['Courier New', 'Courier', 'monospace'], 
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-black text-terminal font-mono antialiased min-h-screen overflow-x-hidden">
+
+    <div class="max-w-4xl mx-auto px-6 py-12">
+
+        <header class="mb-12 border-b border-border pb-8 flex flex-col md:flex-row justify-between items-start md:items-end">
+            <div>
+                <h1 class="text-4xl font-bold tracking-tighter text-white mb-2">PS PKG SCRAPER</h1>
+                <p class="text-dim text-sm">v1.2 // <span class="text-green-500">ONLINE</span></p>
+            </div>
+            <div class="text-xs text-dim mt-4 md:mt-0 text-right">
+                <p>INDEXING: SUPERPSX</p>
+                <p>MODE: WebUI</p>
+            </div>
+        </header>
+
+
+            <form id="search-form" class="border border-border bg-offblack p-6 mb-8 group hover:border-dim transition-colors">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div class="md:col-span-4">
+                        <label class="block text-[10px] text-dim font-bold mb-2 uppercase tracking-wider">Input</label>
+                        <input type="text" id="query-input" required
+                            class="w-full bg-black border border-border text-white px-3 py-3 text-lg font-mono focus:border-dim focus:outline-none transition-colors placeholder-dim/50" 
+                            placeholder="Enter game title (e.g. Elden Ring)..." autocomplete="off">
+                    </div>
+                </div>
+                <button type="submit" 
+                    class="w-full border border-border bg-black text-dim hover:text-white hover:border-white uppercase text-xs font-bold py-3 transition-all flex justify-center items-center gap-2 group">
+                    <span class="group-hover:translate-x-1 transition-transform">Search</span>
+                </button>
+            </form>
+        </section>
+
+        <section id="results-section" class="mb-16 hidden">
+            <h2 class="text-lg font-bold text-white mb-8 flex items-center justify-between">
+                <span>Results</span>
+                <span id="result-count" class="text-xs text-dim font-normal">0 found</span>
+            </h2>
+
+            <div id="results-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                </div>
+        </section>
+        
+        <div id="loader" class="hidden text-center py-12">
+             <span class="text-dim animate-blink text-xl">Scraping...</span>
+        </div>
+
+        <footer class="text-center text-[10px] text-dim py-12 flex flex-col items-center gap-2 border-t border-border mt-12">
+            <span>POWERED BY PYTHON & FASTAPI</span>
+            <span style="opacity:0.5;">i'm really bored lol</span>
+        </footer>
+
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

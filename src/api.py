@@ -1,13 +1,27 @@
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 from src.scraper import PSScraper
+from src.config import cfg
 
 app = FastAPI(title="PS PKG Scraper API")
+
+if cfg.webui:
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+    templates = Jinja2Templates(directory="templates")
+    @app.get("/", response_class=HTMLResponse)
+    async def home(request: Request):
+        return templates.TemplateResponse("index.html", {"request": request})
+else:
+    @app.get("/", response_class=PlainTextResponse)
+    def home():
+        return "PS PKG Scraper API is Online. Use /search or /details."
 
 app.add_middleware(
     CORSMiddleware,
@@ -22,10 +36,6 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 scraper = PSScraper()
-
-@app.get("/", response_class=PlainTextResponse)
-def home():
-    return "PS PKG Scraper API is Online. Use /search or /details."
 
 @app.get("/health", response_class=PlainTextResponse)
 def health_check():
