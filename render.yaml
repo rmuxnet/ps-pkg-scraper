@@ -7,3 +7,5 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.10.0
+      - key: ENABLE_WEBUI
+        value: "true"
