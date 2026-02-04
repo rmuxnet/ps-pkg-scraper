@@ -1,9 +1,10 @@
 import re
 import urllib.parse
-import random
 import os
 from curl_cffi import requests
 from bs4 import BeautifulSoup
+
+from src.logger import log
 
 from src.func.extract_link import extract_links, extract_grouped_links
 from src.func.get_proxy import get_proxy
@@ -14,6 +15,7 @@ try:
     from src.config import cfg
 except Exception:
     cfg = None
+    log.warning("Config not loaded, using defaults.")
 
 DEFAULT_BASE_URL = "https://www.superpsx.com/"
 DEFAULT_IGNORE_DOMAINS = [
@@ -33,22 +35,23 @@ class PSScraper:
 
         self.proxies = []
         proxy_file = scraper_cfg.get("proxy_file", "proxy.txt")
+        
         if proxy_file and os.path.exists(proxy_file):
             try:
                 with open(proxy_file, "r", encoding="utf-8") as f:
                     self.proxies = [line.strip() for line in f if line.strip()]
-                print(f"[INFO] Loaded {len(self.proxies)} proxies from {proxy_file}.")
+                log.info(f"Loaded {len(self.proxies)} proxies from {proxy_file}")
             except Exception as e:
-                print(f"[ERROR] Failed to load proxies from {proxy_file}: {e}")
+                log.error(f"Failed to load proxies from {proxy_file}: {e}")
         elif os.path.exists("proxy.txt"):
             try:
                 with open("proxy.txt", "r", encoding="utf-8") as f:
                     self.proxies = [line.strip() for line in f if line.strip()]
-                print(f"[INFO] Loaded {len(self.proxies)} proxies from proxy.txt.")
+                log.info(f"Loaded {len(self.proxies)} proxies from proxy.txt")
             except Exception as e:
-                print(f"[ERROR] Failed to load proxies from proxy.txt: {e}")
+                log.error(f"Failed to load proxies from proxy.txt: {e}")
         else:
-            print(f"[WARNING] No proxy file found (checked '{proxy_file}' and 'proxy.txt'). Using local IP.")
+            log.warning(f"No proxy file found (checked '{proxy_file}' and 'proxy.txt'). Using local IP.")
 
     def search_games(self, query):
         return func_search_games(self.scraper, self.base_url, self.timeout, self.proxies, query)
@@ -73,7 +76,7 @@ class PSScraper:
 
         proxy = get_proxy(self.proxies)
         if proxy:
-            print(f"[DEBUG] Using Proxy: {proxy.get('https')}")
+            log.debug(f"Using Proxy: {proxy.get('https')}")
 
         try:
             resp = self.scraper.get(game_url, timeout=self.timeout, impersonate="chrome", proxies=proxy)
@@ -83,16 +86,17 @@ class PSScraper:
                 failed_proxy_url = proxy.get('https')
                 if failed_proxy_url in self.proxies:
                     self.proxies.remove(failed_proxy_url)
-                    print(f"[INFO] Proxy died. Removed. {len(self.proxies)} left.")
-                print("[WARNING] Retrying direct...")
+                    log.warning(f"Proxy died ({failed_proxy_url}). Removed. {len(self.proxies)} left.")
+                
+                log.warning("Retrying direct connection...")
                 try:
                     resp = self.scraper.get(game_url, timeout=self.timeout, impersonate="chrome", proxies=None)
                     resp.raise_for_status()
                 except Exception as final_e:
-                    print(f"[ERROR] Link extract failed: {final_e}")
+                    log.error(f"Link extract failed (Direct): {final_e}")
                     return [], metadata
             else:
-                print(f"[ERROR] Link extract failed: {e}")
+                log.error(f"Link extract failed: {e}")
                 return [], metadata
 
         soup = BeautifulSoup(resp.content, "html.parser")
@@ -106,7 +110,7 @@ class PSScraper:
                 dl_url = dl_node["href"]
                 dl_proxy = get_proxy(self.proxies)
                 if dl_proxy:
-                    print(f"[DEBUG] Using Proxy for DL: {dl_proxy.get('https')}")
+                    log.debug(f"Using Proxy for DL Page: {dl_proxy.get('https')}")
 
                 try:
                     dl_resp = self.scraper.get(
@@ -121,8 +125,9 @@ class PSScraper:
                         failed_dl_proxy = dl_proxy.get('https')
                         if failed_dl_proxy in self.proxies:
                             self.proxies.remove(failed_dl_proxy)
-                            print(f"[INFO] DL Proxy died. Removed. {len(self.proxies)} left.")
-                        print("[WARNING] DL proxy failed. Retrying direct...")
+                            log.warning(f"DL Proxy died. Removed. {len(self.proxies)} left.")
+                        
+                        log.warning("DL proxy failed. Retrying direct...")
                         dl_resp = self.scraper.get(dl_url, timeout=self.timeout, impersonate="chrome", proxies=None)
                         dl_resp.raise_for_status()
                     else:
@@ -135,7 +140,7 @@ class PSScraper:
                 if final_links:
                     return final_links, metadata
             except Exception as e:
-                print(f"[WARNING] DL Page extract failed: {e}")
+                log.warning(f"DL Page extract failed: {e}")
                 pass
 
         final_links = self._extract_grouped_links(soup)

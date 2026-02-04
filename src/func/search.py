@@ -1,7 +1,7 @@
 import urllib.parse
 from bs4 import BeautifulSoup
-
 from src.func.get_proxy import get_proxy
+from src.logger import log
 
 def search_games(scraper, base_url, timeout, proxies, query):
     params = {"s": query}
@@ -10,7 +10,7 @@ def search_games(scraper, base_url, timeout, proxies, query):
     proxy = get_proxy(proxies)
 
     if proxy:
-        print(f"[DEBUG] Using Proxy: {proxy.get('https')}")
+        log.debug(f"Search Proxy: {proxy.get('https')}")
 
     try:
         response = scraper.get(
@@ -23,11 +23,13 @@ def search_games(scraper, base_url, timeout, proxies, query):
     except Exception as e:
         if proxy:
             failed_proxy_url = proxy.get('https')
-            print(f"[WARNING] Proxy {failed_proxy_url} failed.")
+            log.warning(f"Proxy {failed_proxy_url} failed during search.")
+            
             if failed_proxy_url in proxies:
                 proxies.remove(failed_proxy_url)
-                print(f"[INFO] Removed bad proxy. {len(proxies)} remaining.")
-            print(f"[WARNING] Retrying with direct connection...")
+                log.info(f"Removed bad proxy. {len(proxies)} remaining.")
+            
+            log.warning("Retrying search with direct connection...")
             try:
                 response = scraper.get(
                     url,
@@ -37,10 +39,10 @@ def search_games(scraper, base_url, timeout, proxies, query):
                 )
                 response.raise_for_status()
             except Exception as final_e:
-                print(f"[ERROR] Search failed (Direct): {final_e}")
+                log.error(f"Search failed (Direct): {final_e}")
                 return []
         else:
-            print(f"[ERROR] Search failed: {e}")
+            log.error(f"Search failed: {e}")
             return []
 
     soup = BeautifulSoup(response.content, "html.parser")
@@ -62,5 +64,6 @@ def search_games(scraper, base_url, timeout, proxies, query):
             "downloads": "N/A",
             "size": "N/A",
         })
-
+    
+    log.info(f"Search for '{query}' returned {len(results)} results.")
     return results
