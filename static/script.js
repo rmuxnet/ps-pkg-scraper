@@ -30,9 +30,8 @@ form.addEventListener('submit', async (e) => {
         }
 
         games.forEach(game => {
-            const card = document.createElement('a');
-            card.href = "#";
-            card.className = "block border border-border bg-offblack p-6 hover:border-white transition group relative overflow-hidden";
+            const card = document.createElement('div');
+            card.className = "block border border-border bg-offblack p-6 hover:border-white transition group relative overflow-hidden cursor-pointer";
             
             const bgImage = game.image ? `url('${game.image}')` : 'none';
 
@@ -60,8 +59,10 @@ form.addEventListener('submit', async (e) => {
             `;
 
             card.addEventListener('click', (ev) => {
-                ev.preventDefault();
-                fetchDetails(game.url, card);
+                if (!card.dataset.original) {
+                    ev.preventDefault();
+                    fetchDetails(game.url, card);
+                }
             });
 
             resultsGrid.appendChild(card);
@@ -77,6 +78,8 @@ form.addEventListener('submit', async (e) => {
 
 async function fetchDetails(url, cardElement) {
     const originalText = cardElement.innerHTML;
+    cardElement.dataset.original = originalText;
+    
     cardElement.innerHTML = `<div class="h-32 flex items-center justify-center text-dim animate-blink">Meow...</div>`;
     
     try {
@@ -95,7 +98,7 @@ async function fetchDetails(url, cardElement) {
                 linksHtml += `
                     <li class="flex justify-between items-center border-b border-border py-2 text-xs">
                         <span class="text-dim">[${group}] ${label}</span>
-                        <a href="${href}" target="_blank" class="text-white hover:text-green-400 hover:underline truncate ml-4 max-w-[150px]">> Open URL</a>
+                        <a href="${href}" target="_blank" onclick="event.stopPropagation()" class="text-white hover:text-green-400 hover:underline truncate ml-4 max-w-[150px]">> Open URL</a>
                     </li>
                 `;
             });
@@ -122,14 +125,16 @@ async function fetchDetails(url, cardElement) {
     } catch (err) {
         alert("Failed to load details.");
         cardElement.innerHTML = originalText;
+        delete cardElement.dataset.original;
     }
 }
 
 window.resetCard = function(btn) {
-    const card = btn.closest('a');
+    const card = btn.closest('div');
     if(card && card.dataset.original) {
         card.innerHTML = card.dataset.original;
         card.classList.add('hover:border-white');
         card.classList.remove('border-dim');
+        delete card.dataset.original;
     }
 }
