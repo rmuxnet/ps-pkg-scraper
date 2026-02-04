@@ -1,0 +1,11 @@
+<div class="mb-3 border-b border-border pb-2 flex justify-between">
+    <span class="text-white font-bold">Data Extracted</span>
+    <button onclick="event.stopPropagation(); resetCard(this)" class="text-red-500 hover:text-red-400 text-xs">[CLOSE]</button>
+</div>
+<div class="space-y-2 mb-4">
+    <div class="flex justify-between text-xs"><span class="text-dim">FW:</span> <span class="text-terminal">{{firmware}}</span></div>
+    <div class="flex justify-between text-xs"><span class="text-dim">Pass:</span> <span class="text-red-400 select-all">{{password}}</span></div>
+</div>
+<ul class="max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+    {{links_list}}
+</ul>
