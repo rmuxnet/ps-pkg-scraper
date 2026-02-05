@@ -35,8 +35,6 @@ form.addEventListener('submit', async (e) => {
     const query = input.value.trim();
     if(!query) return;
 
-    saveHistory(query);
-
     resultsSection.classList.add('hidden');
     loader.classList.remove('hidden');
     resultsGrid.innerHTML = '';
@@ -142,43 +140,3 @@ window.resetCard = function(btn) {
         delete card.dataset.original;
     }
 }
-
-const historyContainer = document.getElementById('history-container');
-const HISTORY_LIMIT = 5;
-
-function renderHistory() {
-    if (!historyContainer) return;
-    const history = JSON.parse(localStorage.getItem('ps_scraper_history') || '[]');
-    historyContainer.innerHTML = '';
-
-    if (history.length > 0) {
-        const label = document.createElement('span');
-        label.className = 'text-[10px] text-dim uppercase mr-2 self-center';
-        label.innerText = 'Recent:';
-        historyContainer.appendChild(label);
-
-        history.forEach(term => {
-            const chip = document.createElement('button');
-            chip.className = 'text-xs text-terminal border border-border bg-offblack px-2 py-1 hover:border-white hover:text-white transition cursor-pointer mr-2';
-            chip.innerText = term;
-            chip.onclick = (ev) => {
-                ev.preventDefault();
-                input.value = term;
-                form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-            };
-            historyContainer.appendChild(chip);
-        });
-    }
-}
-
-function saveHistory(term) {
-    if (!term) return;
-    let history = JSON.parse(localStorage.getItem('ps_scraper_history') || '[]');
-    history = history.filter(item => item.toLowerCase() !== term.toLowerCase());
-    history.unshift(term);
-    if (history.length > HISTORY_LIMIT) history = history.slice(0, HISTORY_LIMIT);
-    localStorage.setItem('ps_scraper_history', JSON.stringify(history));
-    renderHistory();
-}
-
-renderHistory();
